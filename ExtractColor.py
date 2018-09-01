@@ -46,26 +46,26 @@ def make_color_map (img_size, rgb_set, filename):
             count-=1
     img.save(filename)
 
-def main (img_name):
+def main (source_img_name):
     # 出力画像のサイズ
-    outimg_size = (100, 100)
+    output_img_size = (100, 100)
 
     # 画像をリサイズすることでモザイク画像を取得
-    mosaic_img = resize_img('pikachu.png', outimg_size)
+    mosaic_img = resize_img(source_img_name, output_img_size)
     # 取得したモザイク画像を保存
     mosaic_img.save('mosaic_img.png', 'PNG', quality=100, optimize=True)
 
     # RGBに変換
     rgb_img = mosaic_img.convert('RGB')
 
-    # 使われている色種類を取得し，それらのピクセル数をカウント
+    # 使われている色の種類を取得し，それらのピクセル数をカウント
     img_pixel_colors = count_pixel_colors(rgb_img)
 
     for k, v in sorted(img_pixel_colors.items(),  key=lambda x: -x[1]):
         print(k, v)
 
     # ピクセル数の多い色順にピクセルを並べた画像を作成
-    make_color_map(outimg_size, img_pixel_colors, 'color_map.png')
+    make_color_map(output_img_size, img_pixel_colors, 'color_map.png')
 
 if __name__ == '__main__':
     main('pikachu.png')
