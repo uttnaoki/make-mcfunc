@@ -1,5 +1,6 @@
 from PIL import Image
 import math
+import numpy as np
 
 def resize_img (filename, size_tuple):
     # 既存ファイルを readモードで読み込み
@@ -46,6 +47,30 @@ def make_color_map (img_size, rgb_set, filename):
             count-=1
     img.save(filename)
 
+def make_less_color_img (base_img, rgb_set, filename):
+    # rgbの距離(norm)を計算するためにnumpyの配列に変換
+    rgb_set = np.array(rgb_set)
+    rgb_set_len = len(rgb_set)
+
+    # usable_rgb の中から最も this_rgb に近いものを返す
+    def get_nearest_rgb_from_usable (this_rgb, usable_rgb):
+        this_rgb = np.array(this_rgb)
+        norm_set = [np.linalg.norm(this_rgb - rgb_set[i]) for i in range(rgb_set_len)]
+        min_index = np.argmin(norm_set)
+        return tuple(usable_rgb[min_index])
+
+    # 指定されたピクセル(座標)の色を usable_rgb の色に修正する
+    def mod_one_pixel (x, y):
+        r,g,b = base_img.getpixel((x, y))
+        base_img.putpixel((x, y), get_nearest_rgb_from_usable([r,g,b], rgb_set))
+
+    # 画像の幅と高さを取得
+    width, height = base_img.size
+    # 画像の各ピクセルの色を usable_rgb の色に修正する
+    [mod_one_pixel(x, y) for x in range(width) for y in range(height)]
+    # 修正後の画像を保存
+    base_img.save(filename)
+
 def main (source_img_name):
     # 出力画像のサイズ
     output_img_size = (100, 100)
@@ -61,11 +86,25 @@ def main (source_img_name):
     # 使われている色の種類を取得し，それらのピクセル数をカウント
     img_pixel_colors = count_pixel_colors(rgb_img)
 
-    for k, v in sorted(img_pixel_colors.items(),  key=lambda x: -x[1]):
-        print(k, v)
+    # for k, v in sorted(img_pixel_colors.items(),  key=lambda x: -x[1]):
+    #     print(k, v)
 
     # ピクセル数の多い色順にピクセルを並べた画像を作成
     make_color_map(output_img_size, img_pixel_colors, 'color_map.png')
+
+    def get_frequent_color (rgb_count):
+        sorted_rgb_count = sorted(rgb_count.items(), key=lambda x: -x[1])
+        return [list(map(int, rgb[0].split('-'))) for rgb in sorted_rgb_count]
+
+    # リサイズ後の画像に使われている色の数を出力
+    print('color_num: {0}'.format(len(img_pixel_colors)))
+
+    # less_color.png で用いる色の数を定義
+    usable_rgb_num = 30
+    # 使用面積(頻度)の大きい色から usable_rgb_num の数分取ってくる
+    usable_rgb_set = get_frequent_color(img_pixel_colors)[:usable_rgb_num]
+    # usable_rgb_set の色だけで元画像(モザイク)を表現し，保存
+    make_less_color_img(rgb_img, usable_rgb_set, 'less_color.png')
 
 if __name__ == '__main__':
     main('pikachu.png')
