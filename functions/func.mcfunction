@@ -1,0 +1,9 @@
+setblock ~-1 ~6 ~ minecraft:white_wool
+setblock ~0 ~6 ~ minecraft:orange_wool
+setblock ~1 ~6 ~ minecraft:magenta_wool
+setblock ~-1 ~5 ~ minecraft:light_blue_wool
+setblock ~0 ~5 ~ minecraft:yellow_wool
+setblock ~1 ~5 ~ minecraft:lime_wool
+setblock ~-1 ~4 ~ minecraft:pink_wool
+setblock ~0 ~4 ~ minecraft:gray_wool
+setblock ~1 ~4 ~ minecraft:light_gray_wool
