@@ -1,5 +1,10 @@
 tmp.py
 .DS_Store
+.vscode
+
+functions/*
+output_pngs/*
+!.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
