@@ -12,7 +12,7 @@ output_img_dir = 'output_pngs'
 mcfunc_dir = 'functions'
 
 # 出力画像のサイズ
-output_img_size = (100, 100)
+output_img_longside = 100
 
 
 # カラーコード文字列をRGBのタプルに変換する．
@@ -69,9 +69,21 @@ def get_command_set (block_names, selected_block_indexes, canvas_size):
 def main (source_img_path):
     # 入力画像をリサイズ
     img = Image.open(source_img_path, 'r')
+    # 入力画像の長辺を取得
+    source_img_longside = max(img.size)
+    # 入力画像のリサイズ係数を取得
+    resize_coef = source_img_longside / output_img_longside
+    # リサイズ後のサイズを取得
+    output_img_size = (math.ceil(img.size[0]/resize_coef), math.ceil(img.size[1]/resize_coef))
+    # 入力画像をリサイズ
     resized_img = img.resize(output_img_size)
     # RGBに変換
     rgb_img = resized_img.convert('RGB')
+
+    # 画像名を取得
+    source_img_name = source_img_path.split('/')[-1]
+    # 画像名の拡張子じゃない方を取得
+    source_img_basename = source_img_name.split('.')[0]
 
     # 羊毛ブロックの名前(ID)を抽出
     wool_names = [name for name in mcblock.wool_colorcode]
@@ -79,14 +91,10 @@ def main (source_img_path):
     usable_rgb_set = [cc2rgb(cc) for cc in mcblock.wool_colorcode.values()]
 
     # usable_rgb_set で表現した画像を保存し，使われたRGBのindexを取得
-    used_rgb_indexes = redraw(rgb_img, usable_rgb_set, '{0}/wool_mode.png'.format(output_img_dir))
+    used_rgb_indexes = redraw(rgb_img, usable_rgb_set, '{0}/{1}_wool.png'.format(output_img_dir, source_img_basename))
     # 再描画後の画像をマイクラで描画するためのコマンドセットを取得
     command_set = get_command_set(wool_names, used_rgb_indexes, output_img_size)
 
-    # 画像名を取得
-    source_img_name = source_img_path.split('/')[-1]
-    # 画像名の拡張子じゃない方を取得
-    source_img_basename = source_img_name.split('.')[0]
     # 出力するマイクラ用スクリプトのパス名を取得
     mcfunc_path = '{0}/draw_{1}.mcfunction'.format(mcfunc_dir, source_img_basename)
     # マイクラ用スクリプトを出力
@@ -96,6 +104,7 @@ def main (source_img_path):
 if __name__ == '__main__':
     # 入力画像名を取得
     img_names = os.listdir(source_img_dir)
+    # img_names = ['img.png']
 
     # 各入力画像に対して処理を実行
     for img_name in img_names:
