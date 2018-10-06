@@ -55,14 +55,16 @@ def redraw (base_img, rgb_set, filename):
 # マイクラ上の特定の座標にブロックを設置するコマンドを取得
 def get_command (block_name, index, canvas_size, transform):
     x = index%canvas_size[0] + transform['x']
-    y = -(index//canvas_size[1]) + transform['y']
-    return 'setblock ~{0} ~{1} ~ {2}'.format(x, y, block_name)
+    y = -(index//canvas_size[0]) + transform['y']
+    z = transform['z']
+    return 'setblock ~{0} ~{1} ~{2} {3}'.format(x, y, z, block_name)
 
 # 画像をマイクラ上で描画するためのコマンドセットを取得
 def get_command_set (block_names, selected_block_indexes, canvas_size):
     transform = {
         'x': -(canvas_size[0]//2),
-        'y': canvas_size[1]+3
+        'y': (canvas_size[1]//2),
+        'z': -10
     }
     return [get_command(block_names[selected_block_indexes[i]], i, canvas_size, transform) for i in range(len(selected_block_indexes))]
 
@@ -103,8 +105,9 @@ def main (source_img_path):
 
 if __name__ == '__main__':
     # 入力画像名を取得
-    img_names = os.listdir(source_img_dir)
-    # img_names = ['img.png']
+    # img_names = os.listdir(source_img_dir)
+    img_names = ['fushigibana.png', 'sawamura.png']
+    # img_names = ['fushigibana.png']
 
     # 各入力画像に対して処理を実行
     for img_name in img_names:
